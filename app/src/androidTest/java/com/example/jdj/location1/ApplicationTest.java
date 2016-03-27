@@ -1,4 +1,4 @@
-package com.example.android.location1;
+package com.example.jdj.location1;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
