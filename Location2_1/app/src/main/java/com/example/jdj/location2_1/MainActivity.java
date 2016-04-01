@@ -1,5 +1,6 @@
 package com.example.jdj.location2_1;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -8,8 +9,22 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.util.Log;
+import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.location.LocationServices;
+
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+
+    private final String LOG_TAG = "Location2-1";
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
+    private TextView mLatitudeText;
+    private TextView mLongitudeText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +41,18 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        mLatitudeText = (TextView) findViewById(R.id.latitude);
+        mLongitudeText = (TextView) findViewById(R.id.longitude);
+        buildGoogleApiClient();
+    }
+
+    private void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
     }
 
     @Override
@@ -49,4 +76,42 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+        super.onStop();
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        try {
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if (mLastLocation != null) {
+                mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
+                mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
+            }
+        } catch (SecurityException e) {
+            // no harm
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.i(LOG_TAG, "onConnectionSuspended");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.i(LOG_TAG, "onConnectionFailed" + connectionResult.getErrorCode());
+    }
+
 }
