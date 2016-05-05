@@ -19,10 +19,10 @@ import com.google.android.gms.location.Geofence;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GeofenceTransistionsIntentService extends IntentService {
+public class GeofenceTransitionsIntentService extends IntentService {
     protected static final String TAG = "GeoFenceTIS";
 
-    public GeofenceTransistionsIntentService() {
+    public GeofenceTransitionsIntentService() {
         super(TAG);
     }
 
@@ -35,7 +35,7 @@ public class GeofenceTransistionsIntentService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if (geofencingEvent.hasError()) {
-            String errorMessage = getErrorString(geofencingEvent.getErrorCode());
+            String errorMessage = GeofenceErrorMessages.getErrorString(this, geofencingEvent.getErrorCode());
             Log.e(TAG, errorMessage);
             return;
         }
@@ -116,19 +116,6 @@ public class GeofenceTransistionsIntentService extends IntentService {
 
         // Issue the notification
         mNotificationManager.notify(0, builder.build());
-    }
-
-    private String getErrorString(int errorCode) {
-        switch (errorCode) {
-            case GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE:
-                return getString(R.string.geofence_not_available);
-            case GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES:
-                return getString(R.string.geofence_too_many_geofences);
-            case GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS:
-                return getString(R.string.geofence_too_many_pending_intents);
-            default:
-                return getString(R.string.unknown_geofence_error);
-        }
     }
 
     private String getTransitionString(int transitionType) {
